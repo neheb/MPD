@@ -23,7 +23,9 @@
 
 #include <upnp.h>
 #include <upnptools.h>
+#ifdef USING_PUPNP
 #include <ixml.h>
+#endif
 
 #include <assert.h>
 
@@ -44,8 +46,10 @@ DoInit()
 
 	UpnpSetMaxContentLength(2000*1024);
 
+#ifdef USING_PUPNP
 	// Servers sometimes make error (e.g.: minidlna returns bad utf-8)
 	ixmlRelaxParser(1);
+#endif
 }
 
 void

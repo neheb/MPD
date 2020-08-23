@@ -17,6 +17,7 @@
 #ifndef _IXMLWRAP_H_INCLUDED_
 #define _IXMLWRAP_H_INCLUDED_
 
+#ifdef USING_PUPNP
 #include <ixml.h>
 
 #include <string>
@@ -32,4 +33,5 @@ namespace ixmlwrap {
 
 }
 
+#endif /* USING_PUPNP */
 #endif /* _IXMLWRAP_H_INCLUDED_ */

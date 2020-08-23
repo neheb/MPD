@@ -18,7 +18,10 @@
  */
 
 #include "lib/upnp/ContentDirectoryService.hxx"
+#include "config.h"
+#ifdef USING_PUPNP
 #include "lib/upnp/ixmlwrap.hxx"
+#endif
 #include "lib/upnp/UniqueIxml.hxx"
 #include "lib/upnp/Action.hxx"
 #include "Directory.hxx"
@@ -28,8 +31,11 @@
 #include "util/ScopeExit.hxx"
 #include "util/StringFormat.hxx"
 
+#include <algorithm>
+
 #include <stdio.h>
 
+#ifdef USING_PUPNP
 static void
 ReadResultTag(UPnPDirContent &dirbuf, IXML_Document *response)
 {
@@ -39,6 +45,7 @@ ReadResultTag(UPnPDirContent &dirbuf, IXML_Document *response)
 
 	dirbuf.Parse(p);
 }
+#endif
 
 inline void
 ContentDirectoryService::readDirSlice(UpnpClient_Handle hdl,
@@ -47,6 +54,7 @@ ContentDirectoryService::readDirSlice(UpnpClient_Handle hdl,
 				      unsigned &didreadp,
 				      unsigned &totalp) const
 {
+#ifdef USING_PUPNP
 	// Some devices require an empty SortCriteria, else bad params
 	IXML_Document *request =
 		MakeActionHelper("Browse", m_serviceType.c_str(),
@@ -82,6 +90,37 @@ ContentDirectoryService::readDirSlice(UpnpClient_Handle hdl,
 		totalp = ParseUnsigned(value);
 
 	ReadResultTag(dirbuf, response);
+#else
+	std::vector<std::pair<std::string, std::string> > actionParams{
+		{ "ObjectID", objectId },
+		{ "BrowseFlag", "BrowseDirectChildren" },
+		{ "Filter", "*" },
+		{ "SortCriteria", "" },
+		{ "StartingIndex", StringFormat<32>("%u", offset).c_str() },
+		{ "RequestedCount", StringFormat<32>("%u", count).c_str() }
+	};
+	std::vector<std::pair<std::string, std::string> > responseData;
+	int errcode;
+	std::string errdesc;
+	int code =
+		UpnpSendAction(hdl, "", m_actionURL, m_serviceType, "Browse",
+			       actionParams, responseData, &errcode, errdesc);
+	if (code != UPNP_E_SUCCESS)
+		throw FormatRuntimeError("UpnpSendAction() failed: %s",
+					 UpnpGetErrorMessage(code));
+	const char *p = "";
+	didreadp = 0;
+	for (const auto &entry : responseData) {
+		if (entry.first == "Result") {
+			p = entry.second.c_str();
+		} else if (entry.first == "TotalMatches") {
+			totalp = ParseUnsigned(entry.second.c_str());
+		} else if (entry.first == "NumberReturned") {
+			didreadp = ParseUnsigned(entry.second.c_str());
+		}
+	}
+	dirbuf.Parse(p);
+#endif
 }
 
 UPnPDirContent
@@ -110,6 +149,7 @@ ContentDirectoryService::search(UpnpClient_Handle hdl,
 	unsigned offset = 0, total = -1, count;
 
 	do {
+#ifdef USING_PUPNP
 		UniqueIxmlDocument request(MakeActionHelper("Search", m_serviceType.c_str(),
 							    "ContainerID", objectId,
 							    "SearchCriteria", ss,
@@ -147,6 +187,39 @@ ContentDirectoryService::search(UpnpClient_Handle hdl,
 			total = ParseUnsigned(value);
 
 		ReadResultTag(dirbuf, response.get());
+#else
+		std::vector<std::pair<std::string, std::string> > actionParams{
+			{ "ContainerID", objectId },
+			{ "SearchCriteria", ss },
+			{ "Filter", "*" },
+			{ "SortCriteria", "" },
+			{ "StartingIndex",
+			  StringFormat<32>("%u", offset).c_str() },
+			{ "RequestedCount", "0" }
+		};
+		std::vector<std::pair<std::string, std::string> > responseData;
+		int errcode;
+		std::string errdesc;
+		int code = UpnpSendAction(hdl, "", m_actionURL, m_serviceType,
+					  "Search", actionParams, responseData,
+					  &errcode, errdesc);
+		if (code != UPNP_E_SUCCESS)
+			throw FormatRuntimeError("UpnpSendAction() failed: %s",
+						 UpnpGetErrorMessage(code));
+		const char *p = "";
+		count = 0;
+		for (const auto &entry : responseData) {
+			if (entry.first == "Result") {
+				p = entry.second.c_str();
+			} else if (entry.first == "TotalMatches") {
+				total = ParseUnsigned(entry.second.c_str());
+			} else if (entry.first == "NumberReturned") {
+				count = ParseUnsigned(entry.second.c_str());
+				offset += count;
+			}
+		}
+		dirbuf.Parse(p);
+#endif
 	} while (count > 0 && offset < total);
 
 	return dirbuf;
@@ -156,6 +229,7 @@ UPnPDirContent
 ContentDirectoryService::getMetadata(UpnpClient_Handle hdl,
 				     const char *objectId) const
 {
+#ifdef USING_PUPNP
 	// Create request
 	UniqueIxmlDocument request(MakeActionHelper("Browse", m_serviceType.c_str(),
 						    "ObjectID", objectId,
@@ -179,4 +253,30 @@ ContentDirectoryService::getMetadata(UpnpClient_Handle hdl,
 	UPnPDirContent dirbuf;
 	ReadResultTag(dirbuf, response.get());
 	return dirbuf;
+#else
+	std::vector<std::pair<std::string, std::string> > actionParams{
+		{ "ObjectID", objectId }, { "BrowseFlag", "BrowseMetadata" },
+		{ "Filter", "*" },	  { "SortCriteria", "" },
+		{ "StartingIndex", "0" }, { "RequestedCount", "1" }
+	};
+	std::vector<std::pair<std::string, std::string> > responseData;
+	int errcode;
+	std::string errdesc;
+	int code =
+		UpnpSendAction(hdl, "", m_actionURL, m_serviceType, "Browse",
+			       actionParams, responseData, &errcode, errdesc);
+	if (code != UPNP_E_SUCCESS)
+		throw FormatRuntimeError("UpnpSendAction() failed: %s",
+					 UpnpGetErrorMessage(code));
+	const char *p = "";
+	for (const auto &entry : responseData) {
+		if (entry.first == "Result") {
+			p = entry.second.c_str();
+		}
+	}
+
+	UPnPDirContent dirbuf;
+	dirbuf.Parse(p);
+	return dirbuf;
+#endif
 }

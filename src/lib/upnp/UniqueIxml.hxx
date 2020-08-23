@@ -20,6 +20,7 @@
 #ifndef MPD_UPNP_UNIQUE_XML_HXX
 #define MPD_UPNP_UNIQUE_XML_HXX
 
+#ifdef USING_PUPNP
 #include <ixml.h>
 
 #include <memory>
@@ -37,4 +38,5 @@ struct UpnpIxmlDeleter {
 typedef std::unique_ptr<IXML_Document, UpnpIxmlDeleter> UniqueIxmlDocument;
 typedef std::unique_ptr<IXML_NodeList, UpnpIxmlDeleter> UniqueIxmlNodeList;
 
+#endif /* USING_PUPNP */
 #endif

@@ -31,14 +31,12 @@ static Mutex upnp_client_init_mutex;
 static unsigned upnp_client_ref;
 static UpnpClient_Handle upnp_client_handle;
 
-static int
-UpnpClientCallback(Upnp_EventType et,
-#if UPNP_VERSION >= 10800
-		   const
+static int UpnpClientCallback(Upnp_EventType et,
+#if 1
+			      const
 #endif
-		   void *evp,
-		   void *cookie) noexcept
-{
+			      void *evp,
+			      void *cookie) noexcept {
 	if (cookie == nullptr)
 		/* this is the cookie passed to UpnpRegisterClient();
 		   but can this ever happen?  Will libupnp ever invoke

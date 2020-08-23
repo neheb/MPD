@@ -22,14 +22,14 @@
 
 #include <upnp.h>
 
-#if UPNP_VERSION < 10800
+#if 0
 /* emulate the libupnp 1.8 API with older versions */
 
 using UpnpDiscovery = Upnp_Discovery;
 
 #endif
 
-#if UPNP_VERSION < 10624
+#if 0
 #include "util/Compiler.h"
 
 gcc_pure
