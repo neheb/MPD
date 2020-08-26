@@ -93,8 +93,9 @@ ContentDirectoryService::readDirSlice(UpnpClient_Handle hdl,
 		{"BrowseFlag", "BrowseDirectChildren"},
 		{"Filter", "*"},
 		{"SortCriteria", ""},
-		{"StartingIndex", &(StringFormat<32>("%u", offset)[0])},
-		{"RequestedCount", &(StringFormat<32>("%u", count)[0])}};
+		{"StartingIndex", StringFormat<32>("%u", offset).c_str()},
+		{"RequestedCount", StringFormat<32>("%u", count).c_str()}
+        };
 	std::vector<std::pair<std::string, std::string>> responseData;
 	int errcode;
 	std::string errdesc;
