@@ -35,15 +35,13 @@
 static constexpr char PERMISSION_PASSWORD_CHAR = '@';
 static constexpr char PERMISSION_SEPARATOR = ',';
 
-static constexpr struct {
-	const char *name;
-	unsigned value;
-} permission_names[] = {
-	{ "read", PERMISSION_READ },
-	{ "add", PERMISSION_ADD },
-	{ "control", PERMISSION_CONTROL },
-	{ "admin", PERMISSION_ADMIN },
-	{ nullptr, 0 },
+static constexpr auto permission_names = std::array<std::pair<const char *, unsigned int>, 4> {
+	{
+		{ "read", PERMISSION_READ },
+		{ "add", PERMISSION_ADD },
+		{ "control", PERMISSION_CONTROL },
+		{ "admin", PERMISSION_ADMIN },
+	}
 };
 
 static std::map<std::string, unsigned> permission_passwords;
@@ -57,9 +55,9 @@ static unsigned local_permissions;
 static unsigned
 ParsePermission(StringView s)
 {
-	for (auto i = permission_names; i->name != nullptr; ++i)
-		if (s.Equals(i->name))
-			return i->value;
+	for (const auto& name : permission_names)
+		if (s.Equals(name.first))
+			return name.second;
 
 	throw FormatRuntimeError("unknown permission \"%.*s\"",
 				 int(s.size), s.data);

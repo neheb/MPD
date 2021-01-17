@@ -25,9 +25,10 @@
 #include "IdleFlags.hxx"
 #include "util/ASCII.hxx"
 
+#include <array>
 #include <cassert>
 
-static const char *const idle_names[] = {
+static constexpr auto idle_names = std::array<const char *, 14>{
 	"database",
 	"stored_playlist",
 	"playlist",
@@ -42,13 +43,12 @@ static const char *const idle_names[] = {
 	"neighbor",
 	"mount",
 	"partition",
-	nullptr
 };
 
 const char*const*
 idle_get_names() noexcept
 {
-        return idle_names;
+        return idle_names.data();
 }
 
 unsigned
@@ -59,7 +59,7 @@ idle_parse_name(const char *name) noexcept
 	assert(name != nullptr);
 #endif
 
-	for (unsigned i = 0; idle_names[i] != nullptr; ++i)
+	for (unsigned i = 0; i < idle_names.size(); ++i)
 		if (StringEqualsCaseASCII(name, idle_names[i]))
 			return 1 << i;
 
