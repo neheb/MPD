@@ -84,6 +84,9 @@ public:
 	}
 #endif
 
+	ThreadInputStream(const ThreadInputStream &) = delete;
+	ThreadInputStream &operator=(const ThreadInputStream &) = delete;
+
 	/**
 	 * Initialize the object and start the thread.
 	 */

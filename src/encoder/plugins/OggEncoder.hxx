@@ -45,6 +45,9 @@ public:
 		 stream(GenerateSerial()) {
 	}
 
+	OggEncoder(const OggEncoder &) = delete;
+	OggEncoder &operator=(const OggEncoder &) = delete;
+
 	/* virtual methods from class Encoder */
 	void Flush() final {
 		flush = true;

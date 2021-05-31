@@ -37,6 +37,9 @@ public:
 		:implements_tag(_implements_tag) {}
 	virtual ~Encoder() noexcept = default;
 
+	Encoder(const Encoder &) = delete;
+	Encoder &operator=(const Encoder &) = delete;
+
 	bool ImplementsTag() const noexcept {
 		return implements_tag;
 	}

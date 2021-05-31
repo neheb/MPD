@@ -38,6 +38,9 @@ protected:
 public:
 	virtual ~Filter() noexcept = default;
 
+	Filter(const Filter &) = delete;
+	Filter &operator=(const Filter &) = delete;
+
 	/**
 	 * Returns the #AudioFormat produced by FilterPCM().
 	 */

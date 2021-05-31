@@ -37,6 +37,9 @@ public:
 		 client(reader.GetClient()),
 		 input_stream(reader.GetInputStream()) {}
 
+	OggDecoder(const OggDecoder &) = delete;
+	OggDecoder &operator=(const OggDecoder &) = delete;
+
 private:
 	/**
 	 * Load the end-of-stream packet and restore the previous file
