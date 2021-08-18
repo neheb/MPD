@@ -24,7 +24,7 @@
 
 #include <string.h>
 
-const ConfigTemplate config_param_templates[] = {
+constexpr ConfigTemplate config_param_templates[] = {
 	{ "music_directory" },
 	{ "playlist_directory" },
 	{ "follow_inside_symlinks" },
@@ -83,7 +83,7 @@ static constexpr unsigned n_config_param_templates =
 static_assert(n_config_param_templates == unsigned(ConfigOption::MAX),
 	      "Wrong number of config_param_templates");
 
-const ConfigTemplate config_block_templates[] = {
+constexpr ConfigTemplate config_block_templates[] = {
 	{ "audio_output", true },
 	{ "decoder", true },
 	{ "input", true },
