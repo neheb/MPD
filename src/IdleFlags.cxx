@@ -27,7 +27,7 @@
 
 #include <cassert>
 
-static constexpr const char * idle_names[] = {
+static constexpr auto idle_names = std::array{
 	"database",
 	"stored_playlist",
 	"playlist",
@@ -42,10 +42,9 @@ static constexpr const char * idle_names[] = {
 	"neighbor",
 	"mount",
 	"partition",
-	nullptr,
 };
 
-const char*const*
+std::array<const char *, 14>
 idle_get_names() noexcept
 {
         return idle_names;

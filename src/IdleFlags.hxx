@@ -25,6 +25,8 @@
 #ifndef MPD_IDLE_FLAGS_HXX
 #define MPD_IDLE_FLAGS_HXX
 
+#include <array>
+
 #include "util/Compiler.h"
 
 /** song database has been updated*/
@@ -74,7 +76,7 @@ static constexpr unsigned IDLE_PARTITION = 0x2000;
  * Get idle names
  */
 gcc_const
-const char*const*
+std::array<const char *, 14>
 idle_get_names() noexcept;
 
 /**

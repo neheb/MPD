@@ -29,8 +29,8 @@
 static void
 WriteIdleResponse(Response &r, unsigned flags) noexcept
 {
-	const char *const*idle_names = idle_get_names();
-	for (unsigned i = 0; idle_names[i]; ++i) {
+	auto idle_names = idle_get_names();
+	for (size_t i = 0; i < idle_names.size(); ++i) {
 		if (flags & (1 << i))
 			r.Fmt(FMT_STRING("changed: {}\n"), idle_names[i]);
 	}
