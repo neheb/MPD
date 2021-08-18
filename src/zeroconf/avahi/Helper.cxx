@@ -31,7 +31,7 @@ class SharedAvahiClient final : public Avahi::ErrorHandler {
 public:
 	Avahi::Client client;
 
-	SharedAvahiClient(EventLoop &event_loop)
+	explicit SharedAvahiClient(EventLoop &event_loop)
 		:client(event_loop, *this) {}
 
 	/* virtual methods from class Avahi::ErrorHandler */
