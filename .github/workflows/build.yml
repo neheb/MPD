@@ -188,34 +188,44 @@ jobs:
         with:
           msystem: ${{matrix.platform}}
           pacboy: >-
+            bzip2:p
             cc:p
+            chromaprint:p
             cmake:p
             dbus:p
             faad2:p
             ffmpeg:p
             fmt:p
             flac:p
+            fluidsynth:p
             gtest:p
             jack2:p
             libao:p
+            libgme:p
             libid3tag:p
             libmad:p
+            libmicrohttpd:p
+            libmikmod:p
             libmpcdec:p
             libopenmpt:p
             libsamplerate:p
             libshout:p
+            libsidplayfp:p
             libsndfile:p
             libsoxr:p
             libvorbis:p
             meson:p
+            mpg123:p
             ninja:p
             opus:p
             pulseaudio:p
             shine:p
             twolame:p
+            wavpack:p
             yajl:p
+            zziplib:p
 
       - name: Compile and Test
         run: |
-          meson setup "${{github.workspace}}/build" -Dbzip2=disabled -Dcdio_paranoia=disabled -Dchromaprint=disabled -Ddocumentation=disabled -Dfluidsynth=disabled -Dicu=disabled -Diso9660=disabled -Dmikmod=disabled -Dmpg123=disabled -Dnfs=disabled -Dsidplay=disabled -Dudisks=disabled -Dupnp=disabled -Dwavpack=disabled -Dzzip=disabled -Dtest=true -Dwarning_level=3
+          meson setup "${{github.workspace}}/build" -Dcdio_paranoia=disabled -Ddocumentation=disabled -Dicu=disabled -Diso9660=disabled -Dnfs=disabled -Dudisks=disabled -Dupnp=npupnp -Dtest=true -Dwarning_level=3
           meson compile -C "${{github.workspace}}/build" --verbose
