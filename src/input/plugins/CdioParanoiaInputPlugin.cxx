@@ -16,6 +16,7 @@
 #include "util/ByteOrder.hxx"
 #include "util/ScopeExit.hxx"
 #include "fs/AllocatedPath.hxx"
+#include "fs/NarrowPath.hxx"
 #include "Log.hxx"
 #include "config/Block.hxx"
 
@@ -173,7 +174,7 @@ parse_cdio_uri(const char *src)
 static AllocatedPath
 cdio_detect_device()
 {
-	char **devices = cdio_get_devices_with_cap(nullptr, CDIO_FS_AUDIO,
+	auto devices = cdio_get_devices_with_cap(nullptr, CDIO_FS_AUDIO,
 						   false);
 	if (devices == nullptr)
 		return nullptr;
@@ -183,7 +184,8 @@ cdio_detect_device()
 	if (devices[0] == nullptr)
 		return nullptr;
 
-	return AllocatedPath::FromFS(devices[0]);
+	const auto* dev = devices[0];
+	return AllocatedPath::FromFS(dev);
 }
 
 static InputStreamPtr
@@ -203,7 +205,7 @@ input_cdio_open(const char *uri,
 		throw std::runtime_error("Unable find or access a CD-ROM drive with an audio CD in it.");
 
 	/* Found such a CD-ROM with a CD-DA loaded. Use the first drive in the list. */
-	const auto cdio = cdio_open(device.c_str(), DRIVER_UNKNOWN);
+	const auto cdio = cdio_open(NarrowPath(device), DRIVER_UNKNOWN);
 	if (cdio == nullptr)
 		throw std::runtime_error("Failed to open CD drive");
 
