@@ -9,6 +9,8 @@
 #ifdef _WIN32
 #include <ws2tcpip.h>
 #else
+#include <sys/types.h>
+#include <arpa/inet.h>
 #include <netinet/ip.h>
 #endif
 

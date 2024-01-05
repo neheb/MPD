@@ -19,6 +19,11 @@
 #include <winsock2.h> // for SOCKET, INVALID_SOCKET
 #endif
 
+#ifdef HAVE_STRUCT_UCRED
+#include <sys/types.h>
+#include <sys/socket.h>
+#endif
+
 class SocketAddress;
 class StaticSocketAddress;
 class IPv4Address;

@@ -87,6 +87,10 @@ project(
     'opus:docs=disabled',
     'opus:extra-programs=disabled',
     'opus:tests=disabled',
+
+    # libvorbis uses non C11 functions (alloca)
+    'libvorbis:c_std=gnu11',
+    'libvorbis:build.c_std=gnu11',
   ],
   license: 'GPLv2+',
 )

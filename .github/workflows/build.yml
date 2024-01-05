@@ -33,24 +33,22 @@ jobs:
   build-linux:
     strategy:
       matrix:
-        os: [ubuntu-22.04, ubuntu-20.04]
-        include:
-          - os: ubuntu-22.04
-            cc: gcc-11
-            cxx: g++-11
-          - os: ubuntu-20.04
-            cc: gcc-10
-            cxx: g++-10
+        cc: ['12', '13', '14', '15', '16', '17']
+        os: [ubuntu-20.04]
 
     runs-on: ${{ matrix.os }}
 
     env:
-      CC: ccache ${{ matrix.cc }}
-      CXX: ccache ${{ matrix.cxx }}
+      CC: ccache clang-${{ matrix.cc }}
+      CXX: ccache clang++-${{ matrix.cc }}
 
     steps:
       - id: checkout
         uses: actions/checkout@v4
+      - id: setup-gcc
+        uses: egor-tensin/setup-clang@v1
+        with:
+          version: ${{matrix.cc}}
       - id: cache-ccache
         uses: hendrikmuhs/ccache-action@v1
         with:
@@ -59,7 +57,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            ${{ matrix.cxx }} ${{matrix.cc }} \
             libfmt-dev \
             libgtest-dev \
             libpcre2-dev \
@@ -218,4 +215,62 @@ jobs:
       - name: Compile and Test
         run: |
           meson setup "${{github.workspace}}/build" -Dbzip2=disabled -Dcdio_paranoia=disabled -Dchromaprint=disabled -Ddocumentation=disabled -Dfluidsynth=disabled -Dicu=disabled -Diso9660=disabled -Dmikmod=disabled -Dmpg123=disabled -Dnfs=disabled -Dsidplay=disabled -Dudisks=disabled -Dupnp=disabled -Dwavpack=disabled -Dzzip=disabled -Dtest=true -Dwarning_level=3
+          meson compile -C "${{github.workspace}}/build" --verbose
+  Cygwin:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: 'MSYS'
+          install: >-
+            gcc
+            meson
+            ninja
+      - name: Compile and Test
+        run: |
+          meson setup build -Dwarning_level=3 -Dcpp_std=gnu++20
+          meson compile -C build --verbose
+  FreeBSD:
+    runs-on: ubuntu-latest
+    name: FreeBSD
+    steps:
+      - uses: actions/checkout@v4
+      - name: FreeBSD
+        uses: vmactions/freebsd-vm@v1
+        with:
+          prepare: |
+            pkg install -y curl ninja meson pkgconf libmicrohttpd
+          run: |
+            meson setup "${{github.workspace}}/build" -Dwarning_level=3 -Dcpp_std=c++20
+            meson compile -C "${{github.workspace}}/build" --verbose
+  OpenBSD:
+    runs-on: ubuntu-latest
+    name: OpenBSD
+    steps:
+      - uses: actions/checkout@v4
+      - name: OpenBSD
+        uses: vmactions/openbsd-vm@v1
+        with:
+          prepare: |
+            pkg_add curl ninja meson pkgconf libmicrohttpd
+          run: |
+            meson setup "${{github.workspace}}/build" -Dwarning_level=3 -Dcpp_std=c++20
+            meson compile -C "${{github.workspace}}/build" --verbose
+  Alpine:
+    runs-on: ubuntu-latest
+    container:
+      image: alpine
+    steps:
+      - name: Install packages
+        run: |
+          apk add curl-dev expat-dev g++ gcc git libmicrohttpd-dev linux-headers pkgconf meson samurai
+          git config --global --add safe.directory '*'
+      - uses: actions/checkout@v4
+      - name: Sanity Checks
+        run: |
+          meson setup "${{github.workspace}}/build" -Dwarning_level=3 -Dcpp_std=c++20
           meson compile -C "${{github.workspace}}/build" --verbose
