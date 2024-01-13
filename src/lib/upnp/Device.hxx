@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <vector>
+#include <forward_list>
 #include <string>
 
 /**
@@ -43,14 +43,7 @@ public:
 	// Model name: e.g. MediaTomb, DNS-327L ("modelName")
 	std::string modelName;
 	// Services provided by this device.
-	std::vector<UPnPService> services;
-
-	UPnPDevice() = default;
-	UPnPDevice(const UPnPDevice &) = delete;
-	UPnPDevice(UPnPDevice &&) = default;
-	UPnPDevice &operator=(UPnPDevice &&) = default;
-
-	~UPnPDevice() noexcept;
+	std::forward_list<UPnPService> services;
 
 	/** Build device from xml description downloaded from discovery
 	 * @param url where the description came from

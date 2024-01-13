@@ -7,9 +7,6 @@
 
 #include <string.h>
 
-/* this destructor exists here just so it won't get inlined */
-UPnPDevice::~UPnPDevice() noexcept = default;
-
 /**
  * An XML parser which constructs an UPnP device object from the
  * device descriptor.
@@ -67,14 +64,14 @@ protected:
 			trimstring(*value);
 			value = nullptr;
 		} else if (!strcmp(name, "service")) {
-			m_device.services.emplace_back(std::move(m_tservice));
+			m_device.services.emplace_front(std::move(m_tservice));
 			m_tservice = {};
 		}
 	}
 
-	void CharacterData(const XML_Char *s, int len) override {
+	void CharacterData(std::string_view s) override {
 		if (value != nullptr)
-			value->append(s, len);
+			value->append(s);
 	}
 };
 

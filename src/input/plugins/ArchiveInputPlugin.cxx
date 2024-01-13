@@ -7,6 +7,7 @@
 #include "archive/ArchiveFile.hxx"
 #include "../InputStream.hxx"
 #include "fs/LookupFile.hxx"
+#include "fs/NarrowPath.hxx"
 #include "fs/Path.hxx"
 #include "lib/fmt/ExceptionFormatter.hxx"
 #include "lib/fmt/PathFormatter.hxx"
@@ -33,16 +34,18 @@ OpenArchiveInputStream(Path path, Mutex &mutex)
 		return nullptr;
 	}
 
-	const char *suffix = l.archive.GetExtension();
+	const auto suffix = l.archive.GetExtension();
 	if (suffix == nullptr)
 		return nullptr;
 
+	const auto suffix_utf8 = Path::FromFS(suffix).ToUTF8();
+
 	//check which archive plugin to use (by ext)
-	arplug = archive_plugin_from_suffix(suffix);
+	arplug = archive_plugin_from_suffix(suffix_utf8.c_str());
 	if (!arplug) {
 		return nullptr;
 	}
 
-	return archive_file_open(arplug, l.archive)
-		->OpenStream(l.inside.c_str(), mutex);
+	auto np = NarrowPath(l.inside);
+	return archive_file_open(arplug, l.archive)->OpenStream(np, mutex);
 }

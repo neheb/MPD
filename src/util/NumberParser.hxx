@@ -3,57 +3,28 @@
 
 #pragma once
 
-#include <cassert>
-#include <cstdint>
+#include <charconv>
+#include <concepts>
+#include <optional>
 #include <string_view>
 
-#include <stdlib.h>
-
-static inline unsigned
-ParseUnsigned(const char *p, char **endptr=nullptr, int base=10) noexcept
+template<std::integral T>
+[[gnu::pure]]
+std::optional<T>
+ParseInteger(const char *first, const char *last, int base=10) noexcept
 {
-	assert(p != nullptr);
-
-	return (unsigned)strtoul(p, endptr, base);
+	T value;
+	auto [ptr, ec] = std::from_chars(first, last, value, base);
+	if (ptr == last && ec == std::errc{})
+		return value;
+	else
+		return std::nullopt;
 }
 
-static inline int
-ParseInt(const char *p, char **endptr=nullptr, int base=10) noexcept
+template<std::integral T>
+[[gnu::pure]]
+std::optional<T>
+ParseInteger(std::string_view src, int base=10) noexcept
 {
-	assert(p != nullptr);
-
-	return (int)strtol(p, endptr, base);
-}
-
-static inline uint64_t
-ParseUint64(const char *p, char **endptr=nullptr, int base=10) noexcept
-{
-	assert(p != nullptr);
-
-	return strtoull(p, endptr, base);
-}
-
-static inline int64_t
-ParseInt64(const char *p, char **endptr=nullptr, int base=10) noexcept
-{
-	assert(p != nullptr);
-
-	return strtoll(p, endptr, base);
-}
-
-int64_t
-ParseInt64(std::string_view s, const char **endptr_r=nullptr, int base=10) noexcept;
-
-static inline double
-ParseDouble(const char *p, char **endptr=nullptr) noexcept
-{
-	assert(p != nullptr);
-
-	return (double)strtod(p, endptr);
-}
-
-static inline float
-ParseFloat(const char *p, char **endptr=nullptr) noexcept
-{
-	return strtof(p, endptr);
+	return ParseInteger<T>(src.data(), src.data() + src.size(), base);
 }

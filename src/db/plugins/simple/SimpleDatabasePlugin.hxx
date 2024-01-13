@@ -21,19 +21,13 @@ class DatabaseListener;
 class PrefixedLightSong;
 
 class SimpleDatabase : public Database {
-	AllocatedPath path;
+	const AllocatedPath path;
 	std::string path_utf8;
-
-#ifdef ENABLE_ZLIB
-	bool compress;
-#endif
-
-	bool hide_playlist_targets;
 
 	/**
 	 * The path where cache files for Mount() are located.
 	 */
-	AllocatedPath cache_path;
+	const AllocatedPath cache_path;
 
 	Directory *root;
 
@@ -54,9 +48,16 @@ class SimpleDatabase : public Database {
 	mutable unsigned borrowed_song_count;
 #endif
 
+#ifdef ENABLE_ZLIB
+	const bool compress;
+#endif
+
+	const bool hide_playlist_targets;
+
 public:
 	SimpleDatabase(const ConfigBlock &block);
-	SimpleDatabase(AllocatedPath &&_path, bool _compress) noexcept;
+	SimpleDatabase(AllocatedPath &&_path, bool _compress,
+		       bool _hide_playlist_targets) noexcept;
 
 	static DatabasePtr Create(EventLoop &main_event_loop,
 				  EventLoop &io_event_loop,
